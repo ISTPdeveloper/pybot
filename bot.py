@@ -12,13 +12,10 @@ import random
 load_dotenv()
 
 TOKEN = os.getenv("TOKEN")
-print(f"token : {TOKEN}")
 
 PREFIX = os.getenv("PREFIX")
-print(f"prefix : {PREFIX}")
 
 ADMIN_ID = os.getenv("ADMIN_ID")
-print(f"admin_id : {ADMIN_ID}")
 
 # 봇 동작 명령어
 bot = commands.Bot(command_prefix='응애 ', help_command = None)
