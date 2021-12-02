@@ -1,4 +1,8 @@
 discord.py
 openpyxl
 requests
+<<<<<<< HEAD
 Bs4
+=======
+bs4
+>>>>>>> 7852278c9aca7b80ec24778c78fadebf984a74ed

@@ -13,10 +13,17 @@ import time
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
+<<<<<<< HEAD
 PREFIX = os.getenv("PREFIX")
 ADMIN_ID = os.getenv("ADMIN_ID")
 LOG_CHANNEL = os.getenv("LOG_CHANNEL")
 General_ID = os.getenv("General_ID")
+=======
+
+PREFIX = os.getenv("PREFIX")
+
+ADMIN_ID = os.getenv("ADMIN_ID")
+>>>>>>> 7852278c9aca7b80ec24778c78fadebf984a74ed
 
 # 봇 동작 명령어
 bot = commands.Bot(command_prefix='응애 ', help_command = None)
