@@ -6,7 +6,7 @@ c_money = 3
 c_loss = 4
 
 
-default_money = 100000
+default_money = 1000000
 
 wb = load_workbook("userDB.xlsx")
 ws = wb.active
@@ -14,6 +14,7 @@ ws = wb.active
 def loadFile():
     wb = load_workbook("userDB.xlsx")
     ws = wb.active
+    
 def saveFile():
     wb.save("userDB.xlsx")
     wb.close()

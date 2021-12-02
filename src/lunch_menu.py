@@ -17,7 +17,7 @@ element = soup.find_all('tr')
 #print(element[2])
 element = element[2].find_all('td')
 
-element = element[num]  # num
+element = element[num]
 element = str(element)
 element_filter = ['[', ']', '<td class="textC last">', '<td class="textC">', '</td>', '&amp;', '(h)', '.']
 for element_string in element_filter :

@@ -1,6 +1,7 @@
 import asyncio, discord, os
 from discord.ext import commands
 from dotenv import load_dotenv
+import sqlite3
 
 from src.lunch_menu import *
 from embed.help_embed import *
@@ -8,14 +9,14 @@ from game.dice import *
 from src.user import *
 from fuck import *
 import random
+import time
 
 load_dotenv()
-
 TOKEN = os.getenv("TOKEN")
-
 PREFIX = os.getenv("PREFIX")
-
 ADMIN_ID = os.getenv("ADMIN_ID")
+LOG_CHANNEL = os.getenv("LOG_CHANNEL")
+General_ID = os.getenv("General_ID")
 
 # 봇 동작 명령어
 bot = commands.Bot(command_prefix='응애 ', help_command = None)
@@ -26,7 +27,7 @@ client = discord.Client()
 async def on_ready():
     print("다음으로 로그인합니다 : {0.user}".format(bot))
     await bot.change_presence(status=discord.Status.online, activity=None)
-
+   
 # 도움말 출력 명령어
 @bot.command(aliases=['help', '명령어', '?'])
 async def 도움말(ctx) :
@@ -40,29 +41,28 @@ async def hello(ctx):
 @bot.command(aliases=['ping', 'PING', 'Ping'])
 async def 핑(ctx):
     await ctx.send(f"현재 핑은 `{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}` 기준으로 `{str(round(bot.latency*1000))}ms` 입니다.")
+    
 # 날짜 출력 명령어
 @bot.command(aliases=['date', 'DATE', 'Date'])
 async def 날짜(ctx):
     await ctx.send(f"{datetime.datetime.now().strftime('%Y. %m. %d')}")
+    
 # 시간 출력 명령어
 @bot.command(aliases=['time', 'TIME', 'Time'])
 async def 시간(ctx):
     await ctx.send(f"{datetime.datetime.now().strftime('%H:%M:%S')}")
+    
 # 점심 메뉴 출력 명령어 
 @bot.command(aliases=['밥', '메뉴', '점심', '급식', 'lunch', 'Lunch', 'LUNCH', 'menu'])
 async def 밥줘(ctx, day=None,user: discord.User=None):
     if day == None:
         day = str(datetime.datetime.now().strftime('%Y%m%d'))
-    if user==None:
-        user = str(ctx.author.id)
-    else:
-        user = str(user.id)
     if len(day) == 8 and day.isdigit():
         embed = discord.Embed(title="급식 정보", description=f"일시 : `{day}`", color=0xffb266)
         msg = element
 
         embed.add_field(name="급식",value=f">>> {msg}", inline=False)
-        await ctx.send(embed=embed)   
+        await ctx.send(embed=embed) 
         
 # 주사위 게임 명령어    
 @bot.command()
@@ -112,7 +112,7 @@ async def 도박(ctx, money):
                 _color = 0x00ff56
                 print(result)
 
-                modifyMoney(ctx.author.name, userRow, int(1*betting))
+                modifyMoney(ctx.author.name, userRow, int(2*betting))
 
             else:
                 result = "실패"
@@ -139,7 +139,7 @@ async def 도박(ctx, money):
                     _color = 0x00ff56
                     print(result)
 
-                    modifyMoney(ctx.author.name, userRow, int(0.5*betting))
+                    modifyMoney(ctx.author.name, userRow, int(1*betting))
 
                 else:
                     result = "실패"
@@ -299,16 +299,47 @@ async def 송금(ctx, user: discord.User, money):
             await ctx.send("돈이 충분하지 않습니다. 현재 자산: " + str(s_money))
 
         print("------------------------------\n")
-        
+
+# @bot.event    
+# async def on_message(message):
+#     msg = message.content
+#     msg.re
+#     if msg in fuck_list:
+#         await message.delete()
+#         await message.channel.send(f"{message.author.mention} 님이 비속어를 사용하였습니다.")
+#     await bot.process_commands(message)
+
+@bot.event
+async def on_message_delete(message):
+    channel = bot.get_channel(int(LOG_CHANNEL))
+    embed = discord.Embed(title=f"삭제됨", description=f"유저 : {message.author.mention} 채널 : {message.channel.mention}", color=0xFF0000)
+    embed.add_field(name="삭제된 내용", value=f"내용 : {message.content}", inline=False)
+    embed.set_footer(text=f"{message.guild.name} | {datetime.datetime.now().strftime('%Y. %m. %d')}")
+    await channel.send(embed=embed)
+
+@bot.event
+async def on_message_edit(before, after):
+    channel = bot.get_channel(int(LOG_CHANNEL))
+    embed = discord.Embed(title=f"수정됨", description=f"유저 : {before.author.mention} 채널 : {before.channel.mention}", color=0xFF9900)
+    embed.add_field(name="수정 전 내용", value=before.content, inline=True)
+    embed.add_field(name="수정 후 내용", value=after.content, inline=True)
+    embed.set_footer(text=f"{before.guild.name} | {time}")
+    await channel.send(embed=embed)     
+
 @bot.command(aliases=["add", "추가", "돈추가"])
 async def 돈(ctx, money):
-    
-        if str(ctx.author.id) != ADMIN_ID:
-            await ctx.send("관리자 권한이 없어 해당 명령어를 사용할 수 없습니다.")
-        else:
-            user, row = checkUser(ctx.author.name, ctx.author.id)
-            addMoney(row, int(money))
-            print("money")
+    if str(ctx.author.id) != ADMIN_ID:
+        await ctx.send("관리자 권한이 없어 해당 명령어를 사용할 수 없습니다.")
+    else:
+        user, row = checkUser(ctx.author.name, ctx.author.id)
+        addMoney(row, int(money))
+        print("money")
+        
+# @bot.command(aliases=["돈받기ㅇ"])
+# async def 돈받기(ctx):
+#     user, row = checkUser(ctx.author.name, ctx.author.id)
+#     addMoney(row, int(10000))
+#     print("money")
         
 @bot.command(aliases=["초기화"])
 async def reset(ctx):
